@@ -2,6 +2,18 @@ volumes:
   adventure-data:
     external: true
 services:
+  react:
+    image: node:latest
+    command: npm start
+    working_dir: /app
+    volumes:
+      - ./react-1/app:/app
+    ports:
+      - "3000:3000"
+    environment:
+      HOST_OS: ${OS}
+      NODE_ENV: development
+      HOST: "0.0.0.0"
   destination_api:
     build:
       context: ./destination/api
@@ -10,10 +22,6 @@ services:
       - "8100:8000"
     volumes:
       - ./destination/api:/app
-    environment:
-      DATABASE_URL: postgres://destination:password@database:5432/destination
-      WAIT_HOSTS: database:5432
-      WAIT_TIMEOUT: 240
   accommodation_api:
     build:
       context: ./accommodation/api
@@ -22,10 +30,6 @@ services:
       - "8080:8000"
     volumes:
       - ./accommodation/api:/app
-    environment:
-      DATABASE_URL: postgres://accommodation:password@database:5432/accommodation
-      WAIT_HOSTS: database:5432
-      WAIT_TIMEOUT:
   accommodation_poller:
     build:
       context: ./accommodation/poll
@@ -36,10 +40,6 @@ services:
       - ./accommodation/api/accommodation_rest:/app/accommodation_rest
     depends_on:
       - accommodation_api
-    environment:
-      DATABASE_URL: postgres://accommodation:password@database:5432/accommodation
-      WAIT_HOSTS: database:5432, accommodation_api:8000
-      WAIT_TIMEOUT: 240
   things_to_do_api:
     build:
       context: ./things_to_do/api
@@ -48,10 +48,6 @@ services:
       - "8090:8000"
     volumes:
       - ./things_to_do/api:/app
-    environment:
-      DATABASE_URL: postgres://things_to_do:password@database:5432/things_to_do
-      WAIT_HOSTS: database:5432
-      WAIT_TIMEOUT: 240
   things_to_do_poller:
     build:
       context: ./things_to_do/poll
@@ -62,7 +58,3 @@ services:
       - ./things_to_do/api/things_to_do_rest:/app/things_to_do_rest
     depends_on:
       - things_to_do_api
-    environment:
-      DATABASE_URL: postgres://things_to_do:password@database:5432/things_to_do
-      WAIT_HOSTS: database:5432,things_to_do_api:8000
-      WAIT_TIMEOUT: 240
